@@ -1,0 +1,104 @@
+​{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "User": {
+            "Description": "User",
+            "Type": "String"
+        },
+        "Senha": {
+            "NoEcho": "true",
+            "Description": "Senha",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "41"
+        }
+    },
+    "Resources": {
+        "MyUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "LoginProfile": {
+                    "Password": {
+                        "Ref": "Senha"
+                    }
+                },
+                "UserName": {
+                    "Ref": "User"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "POLICYADMIN"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "65893cb9-88b8-463c-a13a-64117bc3d292"
+                }
+            }
+        },
+        "POLICYADMIN": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": "policyadmincf",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "*"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "1f2af6d6-cffc-4643-a90b-edc6ed554cbd"
+                }
+            }
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "65893cb9-88b8-463c-a13a-64117bc3d292": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 110,
+                    "y": 170
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "1f2af6d6-cffc-4643-a90b-edc6ed554cbd"
+                ]
+            },
+            "1f2af6d6-cffc-4643-a90b-edc6ed554cbd": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 250,
+                    "y": 170
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "70d7bc2a-d35c-4e04-a280-38dde4ff5503": {
+                "source": {
+                    "id": "65893cb9-88b8-463c-a13a-64117bc3d292"
+                },
+                "target": {
+                    "id": "1f2af6d6-cffc-4643-a90b-edc6ed554cbd"
+                },
+                "z": 2
+            }
+        }
+    }
+}

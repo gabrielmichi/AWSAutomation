@@ -1,0 +1,122 @@
+​{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Mappings" : {
+        "RegionMap" : {
+          "us-east-1"        : {"dev" : "ami-0ac80df6eff0e70b5", "prod" : "ami-0a0ddd875a1ea2c7f"},
+          "us-west-1"        : {"dev" : "ami-0bdb828fd58c52235", "prod" : "ami-066ee5fd4a9ef77f1"},
+          "eu-west-1"        : {"dev" : "ami-047bb4163c506cd98", "prod" : "ami-0a7c483d527806435"},
+          "ap-northeast-1"   : {"dev" : "ami-06cd52961ce9f0d85", "prod" : "ami-053cdd503598e4a9d"},
+          "ap-southeast-1"   : {"dev" : "ami-08569b978cc4dfa10", "prod" : "ami-0be9df32ae9f92309"}
+        }
+    },
+    "Parameters" : {
+      "InstanceTypeParameter" : {
+        "Type" : "String",
+        "Default" : "t2.micro",
+        "AllowedValues" : ["t2.micro", "m1.small", "m1.large"],
+        "Description" : "Enter t2.micro, m1.small, or m1.large. Default is t2.micro."
+      },
+      "Region" : {
+        "Type" : "String",
+        "Default" : "us-east-1",
+        "AllowedValues" : ["us-east-1", "us-west1"],
+        "Description" : "Seleciona a regiao"
+      },
+      "Env" : {
+        "Type" : "String",
+        "Default" : "prod",
+        "AllowedValues" : ["prod", "dev"],
+        "Description" : "Ambiente prod ou dev"
+      }
+    },
+    "Conditions" :{
+        "CriaVolumeProducao" : {"Fn::Equals" : [{ "Ref" : "Env" }, "prod"]}
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "beca47ee-203c-496a-bf3c-8d70e7869e33": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 220,
+                    "y": 50
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "ad2c3b44-accf-48c2-8cb0-b6ce26da51b5": {
+                "source": {
+                    "id": "beca47ee-203c-496a-bf3c-8d70e7869e33"
+                },
+                "target": {
+                    "id": "131a42bf-5944-4f80-8f09-3a4734aac591"
+                },
+                "z": 1
+            }
+        }
+    },
+    "Resources": {
+        "NGINX": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "SubnetId": "subnet-0b1b8209393214a6d",
+                "ImageId" : { "Fn::FindInMap" : [ "RegionMap",{ "Ref" : "Region" }, { "Ref" : "Env" }]},
+                "InstanceType" : { "Ref" : "InstanceTypeParameter" },
+                "SecurityGroupIds": [
+                    "sg-0470b15093ba11a69"
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "sudo apt-get update\n",
+                                "sudo apt-get install -y nginx\n",
+                                "cd /var/www/html/\n",
+                                "git clone https://github.com/douglasmugnosit/cloudninja-demo-serverapp.git\n",
+                                "mv /var/www/html/cloudninja-demo-serverapp/* /var/www/html/\n",
+                                "rm -rf /var/www/html/cloudninja-demo-serverapp/\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Servidor_NAME"
+                    },
+                    {
+                        "Key": "env",
+                        "Value": { "Ref" : "Env" }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "beca47ee-203c-496a-bf3c-8d70e7869e33"
+                }
+            }
+        },
+        "NGINXVOLUMEADICIONALPROD" : {
+          "Type" : "AWS::EC2::VolumeAttachment",
+          "Condition" : "CriaVolumeProducao",
+          "Properties" : {
+            "InstanceId" : { "Ref" : "NGINX" },
+            "VolumeId"  : { "Ref" : "VOLUMEADICIONAL" },
+            "Device" : "/dev/sdh"
+          }
+        },
+        "VOLUMEADICIONAL" : {
+          "Type" : "AWS::EC2::Volume",
+          "Condition" : "CriaVolumeProducao",
+          "Properties" : {
+            "Size" : "100",
+            "AvailabilityZone" : { "Fn::GetAtt" : [ "NGINX", "AvailabilityZone" ]}
+          }
+        }
+        
+    }
+}

@@ -1,0 +1,41 @@
+​{
+    "Resources": {
+        "NGINX": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "SubnetId": "subnet-0b1b8209393214a6d",
+                "ImageId": "ami-0ac80df6eff0e70b5",
+                "InstanceType": "t2.micro",
+                "SecurityGroupIds": [
+                    "sg-0470b15093ba11a69"
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "sudo apt-get update\n",
+                                "sudo apt-get install -y nginx\n",
+                                "cd /var/www/html/\n",
+                                "git clone https://github.com/douglasmugnosit/cloudninja-demo-serverapp.git\n",
+                                "mv /var/www/html/cloudninja-demo-serverapp/* /var/www/html/\n",
+                                "rm -rf /var/www/html/cloudninja-demo-serverapp/\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Servidor_NAME"
+                    },
+                    {
+                        "Key": "env",
+                        "Value": "prod"
+                    }
+                ]
+            }
+        }
+    }
+}
